@@ -79,13 +79,24 @@ RUN $HADOOP_PREFIX/bin/hdfs namenode -format
 #RUN rm  /opt/hadoop/lib/native/*
 #RUN curl -Ls http://dl.bintray.com/sequenceiq/sequenceiq-bin/hadoop-native-64-2.7.0.tar | tar -x -C /opt/hadoop/lib/native/
 
-# workingaround docker.io build error
+# workaround docker.io build error
 RUN ls -la /opt/hadoop/etc/hadoop/*-env.sh && \
     chmod +x /opt/hadoop/etc/hadoop/*-env.sh && \
     ls -la /opt/hadoop/etc/hadoop/*-env.sh
 
 #####################
+# Spark
 
+RUN curl -s 'https://dist.apache.org/repos/dist/release/spark/spark-1.6.0/spark-1.6.0-bin-hadoop2.6.tgz' | tar -xz -C /opt/
+RUN cd /opt && ln -s ./spark-1.6.0-bin-hadoop2.6 spark
+
+ADD source/spark-1.6.0-bin-hadoop2.6.tgz /opt/
+ADD spark/conf/spark-env.sh /opt/spark-1.6.0-bin-hadoop2.6/conf/spark-env.sh
+ADD spark/conf/slaves /opt/spark-1.6.0-bin-hadoop2.6/conf/slaves
+
+ENV SPARK_HOME /opt/spark
+
+#####################
 
 ADD bootstrap.sh /etc/bootstrap.sh
 RUN chown root:root /etc/bootstrap.sh && \
@@ -104,4 +115,6 @@ EXPOSE 8030 8031 8032 8033 8040 8042 8088
 #Other ports
 EXPOSE 49707 2122   
 
+# Spark submit, admin console, executor, history server
+EXPOSE 7077 8080 65000 65001 65002 8085 8086 8087 18080
 
