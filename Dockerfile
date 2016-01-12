@@ -28,12 +28,11 @@ RUN ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_dsa_key && \
 
 ADD ssh_config /root/.ssh/config
 RUN chmod 600 /root/.ssh/config && \
-    chown root:root /root/.ssh/config
-
-# fix the 254 error code
-RUN sed  -i "/^[^#]*UsePAM/ s/.*/#&/"  /etc/ssh/sshd_config
-RUN echo "UsePAM no" >> /etc/ssh/sshd_config
-RUN echo "Port 2122" >> /etc/ssh/sshd_config
+    chown root:root /root/.ssh/config && \
+    # fix the 254 error code
+    sed  -i "/^[^#]*UsePAM/ s/.*/#&/"  /etc/ssh/sshd_config && \
+    echo "UsePAM no" >> /etc/ssh/sshd_config && \
+    echo "Port 2122" >> /etc/ssh/sshd_config
     
 #####################
 # java
@@ -45,5 +44,64 @@ RUN curl -LO 'http://download.oracle.com/otn-pub/java/jdk/8u71-b15/jdk-8u71-linu
 ENV JAVA_HOME /usr/java/default
 ENV PATH $PATH:$JAVA_HOME/bin
 
-CMD ["/bin/bash.sh", ""]
+
+#####################
+# Hadoop
+
+RUN curl -s https://dist.apache.org/repos/dist/release/hadoop/common/hadoop-2.6.3/hadoop-2.6.3.tar.gz | tar -xz -C /opt/
+RUN cd /opt && ln -s ./hadoop-2.6.3 hadoop
+
+ENV HADOOP_PREFIX /opt/hadoop
+ENV HADOOP_COMMON_HOME /opt/hadoop
+ENV HADOOP_HDFS_HOME /opt/hadoop
+ENV HADOOP_MAPRED_HOME /opt/hadoop
+ENV HADOOP_YARN_HOME /opt/hadoop
+ENV HADOOP_CONF_DIR /opt/hadoop/etc/hadoop
+ENV YARN_CONF_DIR $HADOOP_PREFIX/etc/hadoop
+
+RUN sed -i '/^export JAVA_HOME/ s:.*:export JAVA_HOME=/usr/java/default\nexport HADOOP_PREFIX=/opt/hadoop\nexport HADOOP_HOME=/opt/hadoop\n:' $HADOOP_PREFIX/etc/hadoop/hadoop-env.sh
+RUN sed -i '/^export HADOOP_CONF_DIR/ s:.*:export HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop/:' $HADOOP_PREFIX/etc/hadoop/hadoop-env.sh
+
+RUN mkdir $HADOOP_PREFIX/input
+RUN cp $HADOOP_PREFIX/etc/hadoop/*.xml $HADOOP_PREFIX/input
+
+# pseudo distributed
+ADD hadoop/conf/core-site.xml $HADOOP_PREFIX/etc/hadoop/core-site.xml
+#RUN sed s/HOSTNAME/localhost/ /opt/hadoop/etc/hadoop/core-site.xml.template > /opt/hadoop/etc/hadoop/core-site.xml
+ADD hadoop/conf/hdfs-site.xml $HADOOP_PREFIX/etc/hadoop/hdfs-site.xml
+
+ADD hadoop/conf/mapred-site.xml $HADOOP_PREFIX/etc/hadoop/mapred-site.xml
+ADD hadoop/conf/yarn-site.xml $HADOOP_PREFIX/etc/hadoop/yarn-site.xml
+
+RUN $HADOOP_PREFIX/bin/hdfs namenode -format
+
+# fixing the libhadoop.so like a boss
+#RUN rm  /opt/hadoop/lib/native/*
+#RUN curl -Ls http://dl.bintray.com/sequenceiq/sequenceiq-bin/hadoop-native-64-2.7.0.tar | tar -x -C /opt/hadoop/lib/native/
+
+# workingaround docker.io build error
+RUN ls -la /opt/hadoop/etc/hadoop/*-env.sh && \
+    chmod +x /opt/hadoop/etc/hadoop/*-env.sh && \
+    ls -la /opt/hadoop/etc/hadoop/*-env.sh
+
+#####################
+
+
+ADD bootstrap.sh /etc/bootstrap.sh
+RUN chown root:root /etc/bootstrap.sh && \
+    chmod 700 /etc/bootstrap.sh
+
+ENV BOOTSTRAP /etc/bootstrap.sh
+
+CMD ["/etc/bootstrap.sh", "-d"]
+
+# Hdfs ports
+EXPOSE 50010 50020 50070 50075 50090
+# Mapred ports
+EXPOSE 19888
+#Yarn ports
+EXPOSE 8030 8031 8032 8033 8040 8042 8088
+#Other ports
+EXPOSE 49707 2122   
+
 
