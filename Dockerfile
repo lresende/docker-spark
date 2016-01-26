@@ -24,20 +24,20 @@ MAINTAINER Luciano Resende lresende@apache.org
 USER root
 
 # Clean metadata to avoid 404 erros from yum
-#RUN yum clean all
+RUN yum clean all
 
 #####################
 # security
 
 # install dev tools
-RUN yum install -y curl which tar sudo openssh-server openssh-clients rsync | true
-RUN yum update -y libselinux | true
+RUN yum install -y curl which tar sudo openssh-server openssh-clients rsync | true && \
+    yum update -y libselinux | true && \
 
-# update root password
-RUN echo 'root:passw0rd' | chpasswd
+    # update root password
+    echo 'root:passw0rd' | chpasswd && \
 
-# passwordless ssh
-RUN ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_dsa_key && \
+    # passwordless ssh
+    ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_dsa_key && \
     ssh-keygen -q -N "" -t rsa -f /etc/ssh/ssh_host_rsa_key && \
     ssh-keygen -q -N "" -t rsa -f /root/.ssh/id_rsa && \
     cp /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys
@@ -64,8 +64,9 @@ ENV PATH $PATH:$JAVA_HOME/bin
 #####################
 # Hadoop
 
-RUN curl -s https://dist.apache.org/repos/dist/release/hadoop/common/hadoop-2.6.3/hadoop-2.6.3.tar.gz | tar -xz -C /opt/
-RUN cd /opt && ln -s ./hadoop-2.6.3 hadoop
+RUN curl -s https://dist.apache.org/repos/dist/release/hadoop/common/hadoop-2.6.3/hadoop-2.6.3.tar.gz | tar -xz -C /opt/ && \
+    rm -rf hadoop-2.6.3.tar.gz && \
+    cd /opt && ln -s ./hadoop-2.6.3 hadoop
 
 ENV HADOOP_PREFIX /opt/hadoop
 ENV HADOOP_COMMON_HOME /opt/hadoop
@@ -103,8 +104,9 @@ RUN ls -la /opt/hadoop/etc/hadoop/*-env.sh && \
 #####################
 # Spark
 
-RUN curl -s 'https://dist.apache.org/repos/dist/release/spark/spark-1.6.0/spark-1.6.0-bin-hadoop2.6.tgz' | tar -xz -C /opt/
-RUN cd /opt && ln -s ./spark-1.6.0-bin-hadoop2.6 spark
+RUN curl -s 'https://dist.apache.org/repos/dist/release/spark/spark-1.6.0/spark-1.6.0-bin-hadoop2.6.tgz' | tar -xz -C /opt/ && \
+    rm -rf spark-1.6.0-bin-hadoop2.6.tgz && \
+    cd /opt && ln -s ./spark-1.6.0-bin-hadoop2.6 spark
 
 ADD source/spark-1.6.0-bin-hadoop2.6.tgz /opt/
 ADD spark/conf/spark-env.sh /opt/spark-1.6.0-bin-hadoop2.6/conf/spark-env.sh
@@ -112,6 +114,11 @@ ADD spark/conf/slaves /opt/spark-1.6.0-bin-hadoop2.6/conf/slaves
 
 ENV SPARK_HOME /opt/spark
 ENV SPARK_MASTER_IP=127.0.0.1
+
+#####################
+# clean yum cache
+
+RUN yum clean all
 
 #####################
 
@@ -131,7 +138,5 @@ EXPOSE 19888
 EXPOSE 8030 8031 8032 8033 8040 8042 8088
 #Other ports
 EXPOSE 49707 2122   
-
 # Spark submit, admin console, executor, history server
 EXPOSE 7077 8080 65000 65001 65002 8085 8086 8087 18080
-
