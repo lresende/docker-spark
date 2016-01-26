@@ -111,6 +111,7 @@ ADD spark/conf/spark-env.sh /opt/spark-1.6.0-bin-hadoop2.6/conf/spark-env.sh
 ADD spark/conf/slaves /opt/spark-1.6.0-bin-hadoop2.6/conf/slaves
 
 ENV SPARK_HOME /opt/spark
+ENV SPARK_MASTER_IP=127.0.0.1
 
 #####################
 
