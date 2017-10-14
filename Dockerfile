@@ -53,9 +53,9 @@ RUN chmod 600 /root/.ssh/config && \
 #####################
 # java
 
-RUN curl -LO 'http://download.oracle.com/otn-pub/java/jdk/8u71-b15/jdk-8u71-linux-x64.rpm' -H 'Cookie: oraclelicense=accept-securebackup-cookie' && \
-    rpm -i jdk-8u71-linux-x64.rpm && \
-    rm jdk-8u71-linux-x64.rpm
+RUN curl -LO 'http://download.oracle.com/otn-pub/java/jdk/8u144-b01/090f390dda5b47b9b721c7dfaa008135/jdk-8u144-linux-x64.rpm' -H 'Cookie: oraclelicense=accept-securebackup-cookie' && \
+    rpm -i jdk-8u144-linux-x64.rpm && \
+    rm jdk-8u144-linux-x64.rpm
 
 ENV JAVA_HOME /usr/java/default
 ENV PATH $PATH:$JAVA_HOME/bin
