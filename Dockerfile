@@ -64,9 +64,9 @@ ENV PATH $PATH:$JAVA_HOME/bin
 #####################
 # Hadoop
 
-RUN curl -s https://dist.apache.org/repos/dist/release/hadoop/common/hadoop-2.6.3/hadoop-2.6.3.tar.gz | tar -xz -C /opt/ && \
-    rm -rf hadoop-2.6.3.tar.gz && \
-    cd /opt && ln -s ./hadoop-2.6.3 hadoop
+RUN curl -s https://archive.apache.org/dist/hadoop/common/hadoop-2.7.3/hadoop-2.7.3.tar.gz | tar -xz -C /opt/ && \
+    rm -rf hadoop-2.7.3.tar.gz && \
+    cd /opt && ln -s ./hadoop-2.7.3 hadoop
 
 ENV HADOOP_PREFIX /opt/hadoop
 ENV HADOOP_COMMON_HOME /opt/hadoop
