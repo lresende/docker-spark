@@ -27,9 +27,9 @@ fi
 
 ## build docker image
 if [[ $platform == 'osx' ]]; then
-  docker rmi -f lresende/spark
-  docker build --force-rm=true --rm --no-cache -t lresende/spark .
+  docker rmi -f lresende/spark:2.2.0
+  docker build --force-rm=true --rm --no-cache -t lresende/spark:2.2.0 .
 else
   sudo docker rmi -f lresende/spark
-  sudo docker build --force-rm --rm --no-cache -t lresende/spark .
+  sudo docker build --force-rm --rm --no-cache -t lresende/spark:2.2.0 .
 fi
