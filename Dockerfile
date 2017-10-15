@@ -104,13 +104,13 @@ RUN ls -la /opt/hadoop/etc/hadoop/*-env.sh && \
 #####################
 # Spark
 
-RUN curl -s 'https://dist.apache.org/repos/dist/release/spark/spark-1.6.0/spark-1.6.0-bin-hadoop2.6.tgz' | tar -xz -C /opt/ && \
-    rm -rf spark-1.6.0-bin-hadoop2.6.tgz && \
-    cd /opt && ln -s ./spark-1.6.0-bin-hadoop2.6 spark
+RUN curl -s 'https://archive.apache.org/dist/spark/spark-2.2.0/spark-2.2.0-bin-hadoop2.7.tgz' | tar -xz -C /opt/ && \
+    rm -rf spark-2.2.0-bin-hadoop2.7.tgz && \
+    cd /opt && ln -s ./spark-2.2.0-bin-hadoop2.7 spark
 
-ADD source/spark-1.6.0-bin-hadoop2.6.tgz /opt/
-ADD spark/conf/spark-env.sh /opt/spark-1.6.0-bin-hadoop2.6/conf/spark-env.sh
-ADD spark/conf/slaves /opt/spark-1.6.0-bin-hadoop2.6/conf/slaves
+#ADD source/spark-1.6.0-bin-hadoop2.6.tgz /opt/
+ADD spark/conf/spark-env.sh /opt/spark-2.2.0-bin-hadoop2.7/conf/spark-env.sh
+ADD spark/conf/slaves /opt/spark-2.2.0-bin-hadoop2.7/conf/slaves
 
 ENV SPARK_HOME /opt/spark
 ENV SPARK_MASTER_IP=127.0.0.1
